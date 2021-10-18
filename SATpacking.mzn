@@ -1,6 +1,7 @@
 include "diffn.mzn";
 
-int: width;
+int: w;
+int: width = w+1;
 int: num_of_circuits;
 set of int: NCIRCUITS = 1..num_of_circuits;
 array[NCIRCUITS,1..2] of int: size;
