@@ -1,14 +1,16 @@
-!/usr/bin/env python
+#!/usr/bin/env python
 # coding: utf-8
-
-# In[99]:
-
 
 from z3 import *
 from os import listdir
 from os.path import isfile, join
 from pathlib import Path
 from itertools import combinations
+import random
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatch
+
+random.seed(42)
 
 path = "instances/"
 
@@ -23,19 +25,21 @@ for f in files:
     files_dict[instance] = f
 print(files_dict)
 
+
 # extract the content of each instance as it appears in the corresponding file
 def get_instance(path, instance):
     file = join(path, instance)
-    
+
     instance = {}
-    
+
     with open(file, "r") as _file:
         for idx, line in enumerate(_file):
             stripped_line = line.strip()
             stripped_line = stripped_line.replace(" ", "")
             instance[idx] = list(stripped_line)
-    
+
     return instance
+
 
 print(get_instance(path, files_dict['ins-1']))
 
@@ -61,16 +65,67 @@ print("width: " + str(w))
 print("number of circuits: " + str(n))
 print("plates:", plates)
 
+
 # X coordinates of the plates' bottom-left corners
 X = [ Int('x%s' % i) for i in range(n) ]
 # Y coordinates of the plates' bottom-left corners
 Y = [ Int('y%s' % i) for i in range(n)]
+
 
 def max_z3(vars):
     max = vars[0]
     for v in vars[1:]:
         max = If(v > max, v, max)
     return max
+
+def print_solution(plates, sol):
+    # coordinates of the left-bottom corners of the plates
+    coords_plates = [list(plate['coords']) for plate in sol[1:]]
+
+    print(str(sol[0]['width']) + " " + str(sol[0]['length']))
+    print(str(sol[0]['number of plates']))
+
+    for coords_plate, plate in zip(coords_plates, plates):
+        print(str(plate[0]) + " " + str(plate[1]) + " " + coords_plate[0] + " " + coords_plate[1])
+
+
+def show_solution(plates, sol):
+    # coordinates of the left-bottom corners of the plates
+    coords_plates = [list(plate['coords']) for plate in sol[1:]]
+
+    fig, ax = plt.subplots()
+    rectangles = {}
+    colours = []
+
+    # create a list of random colours
+    for i in range(sol[0]["number of plates"]):
+        colours.append('#%06X' % randint(0, 0xFFFFFF))
+
+    # add rectangular patches(one for each plate) to the dictionary
+    for coords_plate, plate in zip(coords_plates, plates):
+        idx = plates.index(plate)
+        col_idx = idx
+        rectangles[idx] = mpatch.Rectangle((int(coords_plate[0]), int(coords_plate[1])),
+                                           plate[0], plate[1], color=colours[idx])
+
+    # draw the patches and add the number identifying the plate in the center of the patch
+    for r in rectangles:
+        ax.add_artist(rectangles[r])
+        rx, ry = rectangles[r].get_xy()
+        cx = rx + rectangles[r].get_width()/2.0
+        cy = ry + rectangles[r].get_height()/2.0
+
+        ax.annotate(r, (cx, cy), color="w", weight='bold',
+                    fontsize=20, ha='center', va='center')
+
+    ax.set_xlim((0, sol[0]["width"]))
+    ax.set_ylim((0, sol[0]["length"]))
+    ax.set_aspect('equal')
+    plt.grid(color="black", linestyle="--", linewidth=1)
+    plt.xticks(np.arange(0, sol[0]["width"], step = 1))
+    plt.yticks(np.arange(0, sol[0]["width"], step = 1))
+    plt.show()
+
 
 opt = Optimize()
 
@@ -110,13 +165,15 @@ m = opt.model()
 sol = []
 sol.append({
     "width": w,
-    "length": m.get_interp(length),
+    "length": m.get_interp(length).as_long(),
     "number of plates": n
 })
 for i in range(n):
     sol.append({
         "plate": i,
-        "coords": m.evaluate(X[i]).as_string() + " " + m.evaluate(Y[i]).as_string()
+        "coords": m.evaluate(X[i]).as_string() + m.evaluate(Y[i]).as_string()
     })
-print(sol)
+
+print_solution(plates, sol)
+show_solution(plates, sol)
 
