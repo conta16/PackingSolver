@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+
+
 from z3 import *
 from os import listdir
 from os.path import isfile, join
@@ -10,7 +12,8 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatch
 
-random.seed(42)
+
+
 
 path = "instances/"
 
@@ -24,6 +27,8 @@ for f in files:
     instance = f[:f.index(".")]
     files_dict[instance] = f
 print(files_dict)
+
+
 
 
 # extract the content of each instance as it appears in the corresponding file
@@ -41,7 +46,12 @@ def get_instance(path, instance):
     return instance
 
 
+
+
 print(get_instance(path, files_dict['ins-1']))
+
+
+
 
 # extract useful information from the dict representing the instance
 def extract_data(instance):
@@ -60,10 +70,15 @@ def extract_data(instance):
             plates.append(list_ints)
     return width, n_circuits, plates
 
+
+
+
 w, n, plates = extract_data(get_instance(path, files_dict["ins-1"]))
 print("width: " + str(w))
 print("number of circuits: " + str(n))
 print("plates:", plates)
+
+
 
 
 # X coordinates of the plates' bottom-left corners
@@ -72,11 +87,16 @@ X = [ Int('x%s' % i) for i in range(n) ]
 Y = [ Int('y%s' % i) for i in range(n)]
 
 
+
+
 def max_z3(vars):
     max = vars[0]
     for v in vars[1:]:
         max = If(v > max, v, max)
     return max
+
+
+
 
 def print_solution(plates, sol):
     # coordinates of the left-bottom corners of the plates
@@ -89,6 +109,8 @@ def print_solution(plates, sol):
         print(str(plate[0]) + " " + str(plate[1]) + " " + coords_plate[0] + " " + coords_plate[1])
 
 
+
+
 def show_solution(plates, sol):
     # coordinates of the left-bottom corners of the plates
     coords_plates = [list(plate['coords']) for plate in sol[1:]]
@@ -98,6 +120,7 @@ def show_solution(plates, sol):
     colours = []
 
     # create a list of random colours
+    random.seed(42)
     for i in range(sol[0]["number of plates"]):
         colours.append('#%06X' % randint(0, 0xFFFFFF))
 
@@ -125,6 +148,8 @@ def show_solution(plates, sol):
     plt.xticks(np.arange(0, sol[0]["width"], step = 1))
     plt.yticks(np.arange(0, sol[0]["width"], step = 1))
     plt.show()
+
+
 
 
 opt = Optimize()
@@ -176,4 +201,3 @@ for i in range(n):
 
 print_solution(plates, sol)
 show_solution(plates, sol)
-
