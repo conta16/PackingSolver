@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[13]:
 
 
 from z3 import *
@@ -16,7 +16,7 @@ import matplotlib.patches as mpatch
 import math
 
 
-# In[3]:
+# In[14]:
 
 
 path = "instances/"
@@ -33,7 +33,7 @@ for f in files:
 print(files_dict)
 
 
-# In[4]:
+# In[15]:
 
 
 # extract the content of each instance as it appears in the corresponding file
@@ -51,13 +51,13 @@ def get_instance(path, instance):
     return instance
 
 
-# In[5]:
+# In[16]:
 
 
 print(get_instance(path, files_dict['ins-1']))
 
 
-# In[6]:
+# In[17]:
 
 
 # extract useful information from the dict representing the instance
@@ -78,7 +78,7 @@ def extract_data(instance):
     return width, n_circuits, plates
 
 
-# In[7]:
+# In[18]:
 
 
 w, n, plates = extract_data(get_instance(path, files_dict["ins-1"]))
@@ -87,7 +87,7 @@ print("number of circuits: " + str(n))
 print("plates:", plates)
 
 
-# In[8]:
+# In[19]:
 
 
 # X coordinates of the plates' bottom-left corners
@@ -96,7 +96,7 @@ X = [ Int('x%s' % i) for i in range(n) ]
 Y = [ Int('y%s' % i) for i in range(n)]
 
 
-# In[9]:
+# In[20]:
 
 
 def max_z3(vars):
@@ -106,7 +106,7 @@ def max_z3(vars):
     return max
 
 
-# In[10]:
+# In[21]:
 
 
 def print_solution(plates, sol):
@@ -120,7 +120,7 @@ def print_solution(plates, sol):
         print(str(plate[0]) + " " + str(plate[1]) + " " + coords_plate[0] + " " + coords_plate[1])
 
 
-# In[11]:
+# In[22]:
 
 
 def show_solution(plates, sol):
@@ -169,9 +169,11 @@ def show_solution(plates, sol):
     plt.show()
 
 
-# In[12]:
+# In[27]:
 
 
+# to see the effects of symmetry breaking uncomment the following line
+# %%time
 opt = Optimize()
 
 # Constraints
@@ -211,21 +213,23 @@ opt.add(max_w)
 width_plates = [plate[0] for plate in plates] # consider only the width of each plate
 max_plate_w = width_plates.index(max(width_plates)) # extract the index of the plate with maximum width
 # specify new domain for this plate
-opt.add(And(X[max_plate_w] >= 0, X[max_plate_w] <= math.floor((w - width_plates[max_plate_w]) / 2)))
+max_plate_x_sym = [And(X[max_plate_w] >= 0, X[max_plate_w] <= math.floor((w - width_plates[max_plate_w]) / 2))]
 
 # reduce domain of the maximum rectangle (length) (Section 4.2 paper16soh.pdf)
 
 length_plates = [plate[1] for plate in plates] # consider only the length of each plate
 max_plate_l = length_plates.index(max(length_plates)) # extract the index of the plate with maximum length
 # specify new domain for this plate
-opt.add(And(Y[max_plate_l] >= 0, Y[max_plate_l] <= (length - length_plates[max_plate_l]) / 2))
+max_plate_y_sym = [Y[max_plate_l] >= 0, Y[max_plate_l] <= (length - length_plates[max_plate_l]) / 2]
 
 # can't pack large rectangles which exceed the width or the length constraint (or both)
 no_packing = []
 for (i,j) in combinations(range(n),2):
     no_packing.append(Implies(plates[i][0] + plates[j][0] > w, Not(Y[i] == Y[j])))
     no_packing.append(Implies(plates[i][1] + plates[j][1] > length, Not(X[i] == X[j])))
-opt.add(no_packing)
+
+# add symmetry breaking constraints, comment if you don't want them
+opt.add(max_plate_x_sym + max_plate_y_sym + no_packing)
 
 opt.check()
 m = opt.model()
@@ -245,6 +249,17 @@ for i in range(n):
 print_solution(plates, sol)
 show_solution(plates, sol)
 
+
+# Execution time without symmetry breaking constraints:
+#     
+#     CPU times: user 265 ms, sys: 6.47 ms, total: 271 ms
+#     Wall time: 270 ms
+# 
+# Execution time without symmetry breaking constraints:
+#     
+#     CPU times: user 256 ms, sys: 1.9 ms, total: 258 ms
+#     Wall time: 259 ms
+#     
 
 # In[ ]:
 
