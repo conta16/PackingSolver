@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[15]:
+# In[2]:
 
 
 from z3 import *
@@ -16,7 +16,7 @@ import matplotlib.patches as mpatch
 import math
 
 
-# In[16]:
+# In[3]:
 
 
 path = "instances/"
@@ -33,7 +33,7 @@ for f in files:
 print(files_dict)
 
 
-# In[17]:
+# In[4]:
 
 
 # extract the content of each instance as it appears in the corresponding file
@@ -51,13 +51,13 @@ def get_instance(path, instance):
     return instance
 
 
-# In[18]:
+# In[5]:
 
 
 print(get_instance(path, files_dict['ins-1']))
 
 
-# In[19]:
+# In[6]:
 
 
 # extract useful information from the dict representing the instance
@@ -78,7 +78,7 @@ def extract_data(instance):
     return width, n_circuits, plates
 
 
-# In[20]:
+# In[7]:
 
 
 w, n, plates = extract_data(get_instance(path, files_dict["ins-1"]))
@@ -87,7 +87,7 @@ print("number of circuits: " + str(n))
 print("plates:", plates)
 
 
-# In[21]:
+# In[8]:
 
 
 # X coordinates of the plates' bottom-left corners
@@ -96,7 +96,7 @@ X = [ Int('x%s' % i) for i in range(n) ]
 Y = [ Int('y%s' % i) for i in range(n)]
 
 
-# In[22]:
+# In[9]:
 
 
 def max_z3(vars):
@@ -106,7 +106,7 @@ def max_z3(vars):
     return max
 
 
-# In[23]:
+# In[10]:
 
 
 def print_solution(plates, sol):
@@ -120,7 +120,7 @@ def print_solution(plates, sol):
         print(str(plate[0]) + " " + str(plate[1]) + " " + coords_plate[0] + " " + coords_plate[1])
 
 
-# In[24]:
+# In[11]:
 
 
 def show_solution(plates, sol):
@@ -169,7 +169,7 @@ def show_solution(plates, sol):
     plt.show()
 
 
-# In[25]:
+# In[12]:
 
 
 opt = Optimize()
@@ -220,6 +220,12 @@ max_plate_l = length_plates.index(max(length_plates)) # extract the index of the
 # specify new domain for this plate
 opt.add(And(Y[max_plate_l] >= 0, Y[max_plate_l] <= (length - length_plates[max_plate_l]) / 2))
 
+# can't pack large rectangles which exceed the width or the length constraint (or both)
+no_packing = []
+for (i,j) in combinations(range(n),2):
+    no_packing.append(Implies(plates[i][0] + plates[j][0] > w, Not(Y[i] == Y[j])))
+    no_packing.append(Implies(plates[i][1] + plates[j][1] > length, Not(X[i] == X[j])))
+opt.add(no_packing)
 
 opt.check()
 m = opt.model()
