@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[13]:
+# In[92]:
 
 
 from z3 import *
@@ -16,7 +16,7 @@ import matplotlib.patches as mpatch
 import math
 
 
-# In[14]:
+# In[93]:
 
 
 path = "instances/"
@@ -33,7 +33,7 @@ for f in files:
 print(files_dict)
 
 
-# In[15]:
+# In[94]:
 
 
 # extract the content of each instance as it appears in the corresponding file
@@ -51,13 +51,7 @@ def get_instance(path, instance):
     return instance
 
 
-# In[16]:
-
-
-print(get_instance(path, files_dict['ins-1']))
-
-
-# In[17]:
+# In[95]:
 
 
 # extract useful information from the dict representing the instance
@@ -68,26 +62,26 @@ def extract_data(instance):
     for key, value in instance.items():
         # element with key 0 is the width of the plate
         if key == 0:
-            width = int(value[0])
+            width = int("".join(value))
         # element with key 1 is the number of circuits
         elif key == 1:
-            n_circuits = int(value[0])
+            n_circuits = int("".join(value))
         else:
             list_ints = [int(x) for x in value]
             plates.append(list_ints)
     return width, n_circuits, plates
 
 
-# In[18]:
+# In[96]:
 
 
-w, n, plates = extract_data(get_instance(path, files_dict["ins-1"]))
+w, n, plates = extract_data(get_instance(path, files_dict["ins-17"]))
 print("width: " + str(w))
 print("number of circuits: " + str(n))
 print("plates:", plates)
 
 
-# In[19]:
+# In[97]:
 
 
 # X coordinates of the plates' bottom-left corners
@@ -96,7 +90,7 @@ X = [ Int('x%s' % i) for i in range(n) ]
 Y = [ Int('y%s' % i) for i in range(n)]
 
 
-# In[20]:
+# In[98]:
 
 
 def max_z3(vars):
@@ -106,7 +100,7 @@ def max_z3(vars):
     return max
 
 
-# In[21]:
+# In[99]:
 
 
 def print_solution(plates, sol):
@@ -120,7 +114,7 @@ def print_solution(plates, sol):
         print(str(plate[0]) + " " + str(plate[1]) + " " + coords_plate[0] + " " + coords_plate[1])
 
 
-# In[22]:
+# In[100]:
 
 
 def show_solution(plates, sol):
@@ -132,7 +126,7 @@ def show_solution(plates, sol):
     colours = []
     
     # create a list of random colours
-    random.seed(42)
+    random.seed(10000)
     for i in range(sol[0]["number of plates"]):
         colours.append('#%06X' % random.randint(0, 0xFFFFFF))
     
@@ -153,13 +147,13 @@ def show_solution(plates, sol):
         ax.annotate(r, (cx, cy), color="w", weight='bold', 
                     fontsize=20, ha='center', va='center')
 
-    ax.set_xlim((0, sol[0]["width"]))
+    ax.set_xlim((0, sol[0]["max_width"]))
     ax.set_ylim((0, sol[0]["length"]))
     ax.margins=(1)
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
     plt.grid(color="black", linestyle="--", linewidth=1)
     plt.xticks(np.arange(0, sol[0]["width"]+1, step = 1))
-    plt.yticks(np.arange(0, sol[0]["width"]+1, step = 1))
+    plt.yticks(np.arange(0, sol[0]["length"]+1, step = 1))
     # plot the bottom-left corners as black dots
     plt.plot(np.array([int(coords_plate[0]) for coords_plate in coords_plates]), 
                 np.array([int(coords_plate[1]) for coords_plate in coords_plates]),
@@ -169,11 +163,11 @@ def show_solution(plates, sol):
     plt.show()
 
 
-# In[27]:
+# In[101]:
 
 
-# to see the effects of symmetry breaking uncomment the following line
-# %%time
+#%%time
+# to see the effects of symmetry breaking uncomment the previous line
 opt = Optimize()
 
 # Constraints
@@ -203,8 +197,8 @@ opt.add(no_overlapping)
 
 # max_width
 max_w = Int('max_w')
-max_w = max_z3([X[i] + plates[i][0] for i in range(n)]) <= w # upper bound to width
-opt.add(max_w)
+upper_bound = max_w == max_z3([X[i] + plates[i][0] for i in range(n)]) <= w # upper bound to width
+opt.add(upper_bound)
 
 # Symmetry breaking constraints
 
@@ -237,29 +231,19 @@ m = opt.model()
 sol = []
 sol.append({
     "width": w,
+    "max_width": m.get_interp(max_w).as_long(),
     "length": m.get_interp(length).as_long(),
     "number of plates": n
 })
 for i in range(n):
     sol.append({
         "plate": i,
-        "coords": m.evaluate(X[i]).as_string() + m.evaluate(Y[i]).as_string()
+        "coords": [m.evaluate(X[i]).as_string(), m.evaluate(Y[i]).as_string()]
     })
 
 print_solution(plates, sol)
 show_solution(plates, sol)
 
-
-# Execution time without symmetry breaking constraints:
-#     
-#     CPU times: user 265 ms, sys: 6.47 ms, total: 271 ms
-#     Wall time: 270 ms
-# 
-# Execution time without symmetry breaking constraints:
-#     
-#     CPU times: user 256 ms, sys: 1.9 ms, total: 258 ms
-#     Wall time: 259 ms
-#     
 
 # In[ ]:
 
