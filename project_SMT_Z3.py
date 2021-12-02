@@ -44,9 +44,9 @@ def get_instance(path, instance):
     
     with open(file, "r") as _file:
         for idx, line in enumerate(_file):
-            stripped_line = line.strip()
-            stripped_line = stripped_line.replace(" ", "")
-            instance[idx] = list(stripped_line)
+            words = line.split()
+            words = list(words)
+            instance[idx] = words
     
     return instance
 
@@ -59,6 +59,7 @@ def extract_data(instance):
     plates = []
     width = 0
     n_circuits = 0
+    print(instance.items())
     for key, value in instance.items():
         # element with key 0 is the width of the plate
         if key == 0:
@@ -75,7 +76,7 @@ def extract_data(instance):
 # In[96]:
 
 
-w, n, plates = extract_data(get_instance(path, files_dict["ins-17"]))
+w, n, plates = extract_data(get_instance(path, files_dict["ins-7"]))
 print("width: " + str(w))
 print("number of circuits: " + str(n))
 print("plates:", plates)
@@ -145,7 +146,7 @@ def show_solution(plates, sol):
         cy = ry + rectangles[r].get_height()/2.0
         
         ax.annotate(r, (cx, cy), color="w", weight='bold', 
-                    fontsize=20, ha='center', va='center')
+                    fontsize=16, ha='center', va='center')
 
     ax.set_xlim((0, sol[0]["max_width"]))
     ax.set_ylim((0, sol[0]["length"]))
@@ -243,10 +244,4 @@ for i in range(n):
 
 print_solution(plates, sol)
 show_solution(plates, sol)
-
-
-# In[ ]:
-
-
-
 
