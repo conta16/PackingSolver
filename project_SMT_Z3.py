@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[92]:
+# In[26]:
 
 
 from z3 import *
@@ -16,7 +16,7 @@ import matplotlib.patches as mpatch
 import math
 
 
-# In[93]:
+# In[27]:
 
 
 path = "instances/"
@@ -33,7 +33,7 @@ for f in files:
 print(files_dict)
 
 
-# In[94]:
+# In[28]:
 
 
 # extract the content of each instance as it appears in the corresponding file
@@ -51,7 +51,7 @@ def get_instance(path, instance):
     return instance
 
 
-# In[95]:
+# In[29]:
 
 
 # extract useful information from the dict representing the instance
@@ -73,16 +73,20 @@ def extract_data(instance):
     return width, n_circuits, plates
 
 
-# In[96]:
+# In[30]:
 
 
-w, n, plates = extract_data(get_instance(path, files_dict["ins-7"]))
+w, n, plates = extract_data(get_instance(path, files_dict["ins-12"]))
 print("width: " + str(w))
 print("number of circuits: " + str(n))
 print("plates:", plates)
 
+# compute the area of each plate (for symmetry breaking constraints)
+areas = [plate[0] * plate[1] for plate in plates]
+print("areas: {}".format(areas))
 
-# In[97]:
+
+# In[31]:
 
 
 # X coordinates of the plates' bottom-left corners
@@ -91,7 +95,7 @@ X = [ Int('x%s' % i) for i in range(n) ]
 Y = [ Int('y%s' % i) for i in range(n)]
 
 
-# In[98]:
+# In[32]:
 
 
 def max_z3(vars):
@@ -101,7 +105,7 @@ def max_z3(vars):
     return max
 
 
-# In[99]:
+# In[33]:
 
 
 def print_solution(plates, sol):
@@ -115,7 +119,7 @@ def print_solution(plates, sol):
         print(str(plate[0]) + " " + str(plate[1]) + " " + coords_plate[0] + " " + coords_plate[1])
 
 
-# In[100]:
+# In[34]:
 
 
 def show_solution(plates, sol):
@@ -164,14 +168,14 @@ def show_solution(plates, sol):
     plt.show()
 
 
-# In[101]:
+# In[35]:
 
 
 #%%time
 # to see the effects of symmetry breaking uncomment the previous line
 opt = Optimize()
 
-# Constraints
+# Domain reducing constraints and objective
 
 # length to minimize
 length = Int('length')
@@ -201,21 +205,19 @@ max_w = Int('max_w')
 upper_bound = max_w == max_z3([X[i] + plates[i][0] for i in range(n)]) <= w # upper bound to width
 opt.add(upper_bound)
 
-# Symmetry breaking constraints
-
 # reduce domain of the maximum rectangle (width) (Section 4.2 paper16soh.pdf)
 
 width_plates = [plate[0] for plate in plates] # consider only the width of each plate
 max_plate_w = width_plates.index(max(width_plates)) # extract the index of the plate with maximum width
 # specify new domain for this plate
-max_plate_x_sym = [And(X[max_plate_w] >= 0, X[max_plate_w] <= math.floor((w - width_plates[max_plate_w]) / 2))]
+max_plate_x_dom = [And(X[max_plate_w] >= 0, X[max_plate_w] <= math.floor((w - width_plates[max_plate_w]) / 2))]
 
 # reduce domain of the maximum rectangle (length) (Section 4.2 paper16soh.pdf)
 
 length_plates = [plate[1] for plate in plates] # consider only the length of each plate
 max_plate_l = length_plates.index(max(length_plates)) # extract the index of the plate with maximum length
 # specify new domain for this plate
-max_plate_y_sym = [Y[max_plate_l] >= 0, Y[max_plate_l] <= (length - length_plates[max_plate_l]) / 2]
+max_plate_y_dom = [Y[max_plate_l] >= 0, Y[max_plate_l] <= (length - length_plates[max_plate_l]) / 2]
 
 # can't pack large rectangles which exceed the width or the length constraint (or both)
 no_packing = []
@@ -223,8 +225,34 @@ for (i,j) in combinations(range(n),2):
     no_packing.append(Implies(plates[i][0] + plates[j][0] > w, Not(Y[i] == Y[j])))
     no_packing.append(Implies(plates[i][1] + plates[j][1] > length, Not(X[i] == X[j])))
 
-# add symmetry breaking constraints, comment if you don't want them
-opt.add(max_plate_x_sym + max_plate_y_sym + no_packing)
+# add domain reducing constraints, comment if you don't want them
+opt.add(max_plate_x_dom + max_plate_y_dom + no_packing)
+
+
+# In[36]:
+
+
+# Symmetry breaking constraints
+
+# impose ordering between plates with equal size
+equal_size_sym = []
+for (i,j) in combinations(range(n),2):
+    equal_size_sym.append(Implies(plates[i] == plates[j], And(X[i] < X[j], Y[i] < Y[j])))
+opt.add(equal_size_sym)
+
+# break vertical/horizontal symmetries
+
+# smaller circuits should be to the right or below bigger circuits
+smaller_sym = []
+for (i,j) in combinations(range(n),2):
+    smaller_sym.append(Implies(areas[i] < areas[j], Or(X[i] > X[j], Y[i] > Y[j])))
+opt.add(smaller_sym)
+
+
+# In[37]:
+
+
+# check model and find solution 
 
 opt.check()
 m = opt.model()
