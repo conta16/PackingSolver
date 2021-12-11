@@ -112,6 +112,7 @@ constraint forall(e in ((width-size[max_width_index,1]) div 2)..width-size[max_w
 	px[max_width_index,e] %solve reduction for circuit with max width, simmetry breaking
 );
 
+%if we have 2 circuits with same width and height, we impose an ordering (symmetry breaking)
 constraint forall(i in NCIRCUITS, j in i+1..num_of_circuits)(
  if size[i,1] == size[j,1] /\ size[i,2] == size[j,2] then not(lr[j,i]) /\ (lr[i,j] \/ not(ud[j,i])) endif
 );
@@ -120,4 +121,4 @@ var int: final_height = height(ph,max_height); %find position in which ph[o] swi
 
 solve minimize final_height;
 
-%output["height= ", show(final_height), "\n"];
+%output ["height=", show(final_height),"\n"];
