@@ -1,7 +1,7 @@
 include "diffn.mzn";
 
 int: w;
-int: width = w+1; %solver finds solution for w-1, so the incrementation allows us to find solution for w
+int: width = w+1; %solver finds solution for w-1, so the incrementation allows us to find solution for w (width is only used for generators)
 int: num_of_circuits;
 set of int: NCIRCUITS = 1..num_of_circuits;
 array[NCIRCUITS,1..2] of int: size;
@@ -40,7 +40,7 @@ constraint forall(i in NCIRCUITS)( %first column is always false, in order to he
 );
 
 constraint forall(i in NCIRCUITS)( %same here
-        not(py[i,0])   
+ not(py[i,0])   
 );
 
 %order constraints
@@ -50,7 +50,7 @@ constraint forall(i in NCIRCUITS, e in 0..width-size[i,1]-1)(
 );
 
 constraint forall(i in NCIRCUITS, f in 0..sum_height-size[i,2]-1)(
-        not(py[i,f]) \/ py[i,f+1]
+ not(py[i,f]) \/ py[i,f+1]
 );
 
 %the e and f in which the i-th block overlaps the maximum width and height must be true
@@ -59,14 +59,9 @@ constraint forall(i in NCIRCUITS, e in width-size[i,1]..width)(
 	px[i,e]
 );
 
-constraint forall(e in ((width-size[max_width_index,1]) div 2)..width-size[max_width_index,1])(
-	px[max_width_index,e] %solve reduction for circuit with max width, simmetry breaking
-);
-
 constraint forall(i in NCIRCUITS, f in sum_height-size[i,2]..sum_height)(
 	py[i,f]
 );
-
 
 %no overlapping
 
@@ -104,6 +99,21 @@ constraint forall (o in max_height..sum_height-1)(
 
 constraint forall (o in max_height+1..sum_height-1, i in NCIRCUITS)(
 	not(ph[o]) \/ py[i,o-size[i,2]]
+);
+
+%speeding up constraints
+%if the sum of the widths of 2 circuits is higher than the width of the plate, then the circuits can't be to the left of the other or viceversa
+
+constraint forall(i in NCIRCUITS, j in i+1..num_of_circuits)(
+ if size[i,1] + size[j,1] > w then not(lr[i,j]) /\ not(lr[j,i]) endif
+);
+
+constraint forall(e in ((width-size[max_width_index,1]) div 2)..width-size[max_width_index,1])(
+	px[max_width_index,e] %solve reduction for circuit with max width, simmetry breaking
+);
+
+constraint forall(i in NCIRCUITS, j in i+1..num_of_circuits)(
+ if size[i,1] == size[j,1] /\ size[i,2] == size[j,2] then not(lr[j,i]) /\ (lr[i,j] \/ not(ud[j,i])) endif
 );
 
 var int: final_height = height(ph,max_height); %find position in which ph[o] switches from false to true (height that contains each block)
