@@ -1,3 +1,5 @@
+from z3 import *
+
 class utility:
 
 	def __init__(self):
@@ -23,10 +25,17 @@ class utility:
 	def get_sum_height(self):
 		return self._sum
 
-	def height_needed(self,ph,pos):
+	def height_needed(self,ph,s,final_height,pos):
 		if pos == self._sum-self._max:
-			return pos
-		elif ph[pos] != ph[pos+1]:
-			return pos
+			print("oh no")
+			#return pos
 		else:
-			 return height_needed(ph,pos+1)
+			s.add(Implies(And(ph[pos+1],Not(ph[pos])),final_height==pos))
+			self.height_needed(ph,s,final_height,pos+1)
+			print(s)
+			#tmp = If(ph[pos], tmp == 5, tmp == -1)
+			#print("tmp ",simplify(tmp))
+			#if tmp != -1:
+			#	print("in")
+			#	return tmp
+			#return self.height_needed(ph,pos+1)

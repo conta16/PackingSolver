@@ -10,7 +10,7 @@ class data:
 		lines = '\n'.join(lines)
 		root = lxml.etree.fromstring(lines)
 
-		self._width = int(root.xpath('//app/width/text()')[0])
+		self._width = int(root.xpath('//app/width/text()')[0])+1
 		self._num_of_circuits = int(root.xpath('//app/numcircuits/text()')[0])
 		self._size = []
 		for i in range(1,self._num_of_circuits+1):
