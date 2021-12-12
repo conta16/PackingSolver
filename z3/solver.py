@@ -2,7 +2,6 @@ from z3 import *
 from data import data
 from utility import utility
 import numpy as np
-import collections
 
 class solver:
 
@@ -15,22 +14,15 @@ class solver:
 		tmp_ncirc = self._d.get_num_of_circuits()
 		tmp_width = self._d.get_width()
 
-		max_height = self._u.compute_max_height(self._d.get_size())
-		sum_height = self._u.compute_sum_height(self._d.get_size())
+		self._max_height = self._u.compute_max_height(self._d.get_size())
+		self._sum_height = self._u.compute_sum_height(self._d.get_size())
 
-		#self._lr = [ [ Bool("lr_%s_%s" % (i+1, j+1)) for j in range(tmp_ncirc) ] for i in range(tmp_ncirc) ]
-		#self._ud = [ [ Bool("ud_%s_%s" % (i+1, j+1)) for j in range(tmp_ncirc) ] for i in range(tmp_ncirc) ]
-		#self._px = [ [ Bool("px_%s_%s" % (i+1, j)) for j in range(tmp_width+1) ] for i in range(tmp_ncirc) ]
-		#self._py = [ [ Bool("py_%s_%s" % (i+1, j)) for j in range(sum_height+1) ] for i in range(tmp_ncirc) ]
-		self._ph = [ Bool("%s_ph" % (i)) for i in range(max_height,sum_height+1) ]
+		self._ph = [ Bool("%s_ph" % (i)) for i in range(self._max_height,self._sum_height+1) ]
 
 		self._lr = np.reshape(np.array([ Bool("%s_lr" % (i+1)) for i in range(tmp_ncirc*tmp_ncirc) ]),(tmp_ncirc,-1))
 		self._ud = np.reshape(np.array([ Bool("%s_ud" % (i+1)) for i in range(tmp_ncirc*tmp_ncirc) ]),(tmp_ncirc,-1))
 		self._px = np.reshape(np.array([ Bool("%s_px" % (i+1)) for i in range((tmp_width+1)*tmp_ncirc) ]),(tmp_ncirc,-1))
-		self._py = np.reshape(np.array([ Bool("%s_py" % (i+1)) for i in range((sum_height+1)*tmp_ncirc) ]),(tmp_ncirc,-1))
-		print(self._lr)
-
-		self._final_height = Int('final_height')
+		self._py = np.reshape(np.array([ Bool("%s_py" % (i+1)) for i in range((self._sum_height+1)*tmp_ncirc) ]),(tmp_ncirc,-1))
 
 	def debug(self):
 		print(self._d.get_width())
@@ -41,9 +33,6 @@ class solver:
 		tmp_ncirc = self._d.get_num_of_circuits()
 		tmp_width = self._d.get_width()
 		tmp_size = self._d.get_size()
-
-		max_height = self._u.get_max_height()
-		sum_height = self._u.get_sum_height()
 
 		#order encoding
 
@@ -62,11 +51,11 @@ class solver:
 				self._s.add(self._px[i][e])
 
 		for i in range(tmp_ncirc):
-			for f in range(sum_height-tmp_size[i][1]):
+			for f in range(self._sum_height-tmp_size[i][1]):
 				self._s.add(Or(Not(self._py[i][f]),self._py[i][f+1]))
 
 		for i in range(tmp_ncirc):
-			for f in range(sum_height-tmp_size[i][1], sum_height+1):
+			for f in range(self._sum_height-tmp_size[i][1], self._sum_height+1):
 				self._s.add(self._py[i][f])
 
 		#no overlapping
@@ -88,7 +77,7 @@ class solver:
 
 		for i in range(tmp_ncirc):
 			for j in range(i+1, tmp_ncirc):
-				for f in range(sum_height-tmp_size[j][1]+1):
+				for f in range(self._sum_height-tmp_size[j][1]+1):
 					self._s.add(Or(Not(self._ud[j][i]),self._py[j][f],Not(self._py[i][f+tmp_size[j][1]])))
 
 		for i in range(tmp_ncirc):
@@ -98,68 +87,32 @@ class solver:
 
 		for i in range(tmp_ncirc):
 			for j in range(i+1, tmp_ncirc):
-				for f in range(sum_height-tmp_size[i][1]+1):
+				for f in range(self._sum_height-tmp_size[i][1]+1):
 					self._s.add(Or(Not(self._ud[i][j]),self._py[i][f],Not(self._py[j][f+tmp_size[i][1]])))
 
 		#order constraint
 
-		for o in range(sum_height-max_height):
+		for o in range(self._sum_height-self._max_height):
 			self._s.add(Or(Not(self._ph[o]),self._ph[o+1]))
 
-		for o in range(1,sum_height-max_height):
+		for o in range(1,self._sum_height-self._max_height):
 			for i in range(tmp_ncirc):
 				self._s.add(Or(Not(self._ph[o]),self._py[i][o-tmp_size[i][1]]))
 
-		#self._final_height = self._u.height_needed(self._ph,0)
-		#self._u.height_needed(self._ph,self._s,self._final_height,0)
-		for pos in range(len(self._ph)-1): #this needs to be checked, it is wrong
-			self._s.add(Implies(And(self._ph[pos+1],Not(self._ph[pos])),self._final_height==pos))
-			self._s.add(Implies(self._final_height==pos,And(self._ph[pos+1],Not(self._ph[pos]))))
-		print(self._s)
-		#self._s.add(self._final_height <= self._u.height_needed(self._ph,0))
-		#self._s.add(self._ph[13])
-
 	def solve(self):
 		set_option(max_lines=500,max_args=500)
-		mx = self._s.minimize(self._final_height)
+		mx = self._s.minimize(self._u.get_sym_height(self._ph))
 		if self._s.check() == sat:
-			#print(mx.value())
-			pass
+			m = self._s.model()
 
-		m = self._s.model()
+			lr, ud, px, py, ph = self._u.symb2array(m,self._d.get_num_of_circuits())
 
-		lr, ud, px, py, ph = {}, {}, {}, {}, {}
+			final_height = self._u.get_height(ph) - 1
 
-		for d in m:
-			#print(d," ",m[d])
-			if "lr" in str(d):
-				lr[str(d)] = 1 if str(m[d]) == 'True' else 0
-			elif "ud" in str(d):
-				ud[str(d)] = 1 if str(m[d]) == 'True' else 0
-			elif "px" in str(d):
-				px[str(d)] = 1 if str(m[d]) == 'True' else 0
-			elif "py" in str(d):
-				py[str(d)] = 1 if str(m[d]) == 'True' else 0
-			elif "ph" in str(d):
-				ph[str(d)] = 1 if str(m[d]) == 'True' else 0
-		#print(lr.items())
-		print(px)
-		lr = collections.OrderedDict(sorted(lr.items(),key=self._u.comp))
-		ud = collections.OrderedDict(sorted(ud.items(),key=self._u.comp))
-		px = collections.OrderedDict(sorted(px.items(),key=self._u.comp))
-		py = collections.OrderedDict(sorted(py.items(),key=self._u.comp))
-		ph = collections.OrderedDict(sorted(ph.items(),key=self._u.comp))
-		print(px)
-		num = self._d.get_num_of_circuits()
+			x_coordinates = self._u.get_coordinates(px)
+			y_coordinates = self._u.get_coordinates(py)
 
-		lr = np.reshape(np.fromiter(lr.values(), dtype=int),(num,-1))
-		ud = np.reshape(np.fromiter(ud.values(), dtype=int),(num,-1))
-		px = np.reshape(np.fromiter(px.values(), dtype=int),(num,-1))
-		py = np.reshape(np.fromiter(py.values(), dtype=int),(num,-1))
-		ph = np.fromiter(ph.values(), dtype=int)
-		#print(self._py)
-		print(lr)
-		print(ud)
-		print(px)
-		print(py)
-		print(ph)
+			self._u.debug(self._d.get_width(),self._d.get_num_of_circuits(),self._d.get_size(),lr,ud,px,py,ph)
+			self._u.plot(x_coordinates,y_coordinates,self._d.get_size(),self._d.get_width()-1,final_height)
+		else:
+			print("unsat")

@@ -9,3 +9,4 @@ if __name__ == "__main__":
 	s.debug()
 	s.constraints()
 	s.solve()
+	s.debug()
