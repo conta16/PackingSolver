@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[26]:
+# In[62]:
 
 
 from z3 import *
@@ -16,7 +16,7 @@ import matplotlib.patches as mpatch
 import math
 
 
-# In[27]:
+# In[63]:
 
 
 path = "instances/"
@@ -33,7 +33,7 @@ for f in files:
 print(files_dict)
 
 
-# In[28]:
+# In[64]:
 
 
 # extract the content of each instance as it appears in the corresponding file
@@ -51,7 +51,7 @@ def get_instance(path, instance):
     return instance
 
 
-# In[29]:
+# In[65]:
 
 
 # extract useful information from the dict representing the instance
@@ -73,10 +73,10 @@ def extract_data(instance):
     return width, n_circuits, plates
 
 
-# In[30]:
+# In[66]:
 
 
-w, n, plates = extract_data(get_instance(path, files_dict["ins-12"]))
+w, n, plates = extract_data(get_instance(path, files_dict["ins-10"]))
 print("width: " + str(w))
 print("number of circuits: " + str(n))
 print("plates:", plates)
@@ -86,7 +86,7 @@ areas = [plate[0] * plate[1] for plate in plates]
 print("areas: {}".format(areas))
 
 
-# In[31]:
+# In[67]:
 
 
 # X coordinates of the plates' bottom-left corners
@@ -95,7 +95,7 @@ X = [ Int('x%s' % i) for i in range(n) ]
 Y = [ Int('y%s' % i) for i in range(n)]
 
 
-# In[32]:
+# In[68]:
 
 
 def max_z3(vars):
@@ -105,7 +105,7 @@ def max_z3(vars):
     return max
 
 
-# In[33]:
+# In[69]:
 
 
 def print_solution(plates, sol):
@@ -119,7 +119,7 @@ def print_solution(plates, sol):
         print(str(plate[0]) + " " + str(plate[1]) + " " + coords_plate[0] + " " + coords_plate[1])
 
 
-# In[34]:
+# In[70]:
 
 
 def show_solution(plates, sol):
@@ -168,7 +168,7 @@ def show_solution(plates, sol):
     plt.show()
 
 
-# In[35]:
+# In[71]:
 
 
 #%%time
@@ -222,14 +222,14 @@ max_plate_y_dom = [Y[max_plate_l] >= 0, Y[max_plate_l] <= (length - length_plate
 # can't pack large rectangles which exceed the width or the length constraint (or both)
 no_packing = []
 for (i,j) in combinations(range(n),2):
-    no_packing.append(Implies(plates[i][0] + plates[j][0] > w, Not(Y[i] == Y[j])))
-    no_packing.append(Implies(plates[i][1] + plates[j][1] > length, Not(X[i] == X[j])))
+    no_packing.append(And(Implies(plates[i][0] + plates[j][0] > w, Not(Y[i] == Y[j])), 
+        Implies(plates[i][1] + plates[j][1] > length, Not(X[i] == X[j]))))
 
 # add domain reducing constraints, comment if you don't want them
 opt.add(max_plate_x_dom + max_plate_y_dom + no_packing)
 
 
-# In[36]:
+# In[72]:
 
 
 # Symmetry breaking constraints
@@ -242,14 +242,14 @@ opt.add(equal_size_sym)
 
 # break vertical/horizontal symmetries
 
-# smaller circuits should be to the right or below bigger circuits
+# smaller circuits should be to the right or above bigger circuits
 smaller_sym = []
 for (i,j) in combinations(range(n),2):
     smaller_sym.append(Implies(areas[i] < areas[j], Or(X[i] > X[j], Y[i] > Y[j])))
 opt.add(smaller_sym)
 
 
-# In[37]:
+# In[73]:
 
 
 # check model and find solution 
@@ -272,4 +272,10 @@ for i in range(n):
 
 print_solution(plates, sol)
 show_solution(plates, sol)
+
+
+# In[ ]:
+
+
+
 
