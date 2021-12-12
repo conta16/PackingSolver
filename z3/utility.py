@@ -39,3 +39,5 @@ class utility:
 			#	print("in")
 			#	return tmp
 			#return self.height_needed(ph,pos+1)
+	def comp(self,o):
+  		return int(o[0].split('_')[0])
