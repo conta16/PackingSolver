@@ -20,7 +20,7 @@ constraint forall(i in 1..num_plates)(x[i] >= 0 /\ x[i] <= width - plates_x[i]);
 constraint forall(i in 1..num_plates)(y[i] >= 0 /\ y[i] <= length - plates_y[i]);
 
 % no overlap
-constraint forall(i, j in 1..num_plates where i != j) (
+constraint forall(i, j in 1..num_plates where i < j) (
   x[i] + plates_x[i] <= x[j] \/
   x[j] + plates_x[j] <= x[i] \/
   y[i] + plates_y[i] <= y[j] \/
@@ -32,23 +32,38 @@ constraint forall(i in 1..num_plates)(
 );
 
 % no packing constraint
-constraint forall(i, j in 1..num_plates where i != j)(
+constraint forall(i, j in 1..num_plates where i < j)(
     ((plates_x[i] + plates_x[j] > width) -> y[i] != y[j]) /\ 
     ((plates_y[i] + plates_y[j] > length) -> x[i] != x[j])
   );
   
 % impose ordering between plates with equal size
 
-constraint forall(i, j in 1..num_plates where i != j)(
+constraint forall(i, j in 1..num_plates where i < j)(
     (plates_x[i] == plates_x[j] /\ plates_y[i] == plates_y[j]) ->
     (x[i] < x[j] /\ y[i] < y[j]));
 
 % smaller circuits should be to the right or above bigger ones
 
-constraint forall(i, j in 1..num_plates where i != j) (
+constraint forall(i, j in 1..num_plates where i < j) (
     ((areas[i] < areas[j]) -> (x[i] > x[j] \/ y[i] > y[j]))
    );
-    
+
+% further reduce the domain of the "biggest" circuits
+% along the x dimension
+
+int: max_idx_w = arg_max([plates_x[i] | i in 1..num_plates]);
+
+constraint (
+  x[max_idx_w] >= 0 /\ x[max_idx_w] <= ((width - plates_x[max_idx_w]) div 2)
+  );
+
+% along the y dimension
+int: max_idx_l = arg_max([plates_y[i] | i in 1..num_plates]);
+constraint (
+  y[max_idx_l] >= 0 /\ y[max_idx_l] <= ((length - plates_y[max_idx_l]) div 2)
+  );
+
 solve minimize length;
 output [show(width) ++ " " ++ show(length) ++ "\n" ++
         show(num_plates) ++ "\n"] ++ 
