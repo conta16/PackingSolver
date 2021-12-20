@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[62]:
+# In[92]:
 
 
 from z3 import *
@@ -16,7 +16,7 @@ import matplotlib.patches as mpatch
 import math
 
 
-# In[63]:
+# In[93]:
 
 
 path = "instances/"
@@ -33,7 +33,7 @@ for f in files:
 print(files_dict)
 
 
-# In[64]:
+# In[94]:
 
 
 # extract the content of each instance as it appears in the corresponding file
@@ -51,7 +51,7 @@ def get_instance(path, instance):
     return instance
 
 
-# In[65]:
+# In[95]:
 
 
 # extract useful information from the dict representing the instance
@@ -73,10 +73,10 @@ def extract_data(instance):
     return width, n_circuits, plates
 
 
-# In[66]:
+# In[96]:
 
 
-w, n, plates = extract_data(get_instance(path, files_dict["ins-10"]))
+w, n, plates = extract_data(get_instance(path, files_dict["ins-12"]))
 print("width: " + str(w))
 print("number of circuits: " + str(n))
 print("plates:", plates)
@@ -86,7 +86,7 @@ areas = [plate[0] * plate[1] for plate in plates]
 print("areas: {}".format(areas))
 
 
-# In[67]:
+# In[97]:
 
 
 # X coordinates of the plates' bottom-left corners
@@ -95,7 +95,7 @@ X = [ Int('x%s' % i) for i in range(n) ]
 Y = [ Int('y%s' % i) for i in range(n)]
 
 
-# In[68]:
+# In[98]:
 
 
 def max_z3(vars):
@@ -105,7 +105,7 @@ def max_z3(vars):
     return max
 
 
-# In[69]:
+# In[99]:
 
 
 def print_solution(plates, sol):
@@ -119,7 +119,7 @@ def print_solution(plates, sol):
         print(str(plate[0]) + " " + str(plate[1]) + " " + coords_plate[0] + " " + coords_plate[1])
 
 
-# In[70]:
+# In[100]:
 
 
 def show_solution(plates, sol):
@@ -168,7 +168,7 @@ def show_solution(plates, sol):
     plt.show()
 
 
-# In[71]:
+# In[101]:
 
 
 #%%time
@@ -221,23 +221,32 @@ max_plate_y_dom = [Y[max_plate_l] >= 0, Y[max_plate_l] <= (length - length_plate
 
 # can't pack large rectangles which exceed the width or the length constraint (or both)
 no_packing = []
+# if the sum of the widths of two plates exceeds the maximum width, one has to be at least above the other
+first_implication = Implies(plates[i][0] + plates[j][0] > w, 
+                            Or(Y[j] >= Y[i] + plates[i][1], Y[i] >= Y[j] + plates[j][1]))
+
+# if the sum of the lengths of two plates exceeds the maximum length, one can't be above the other
+second_implication = Implies(plates[i][1] + plates[j][1] > length, 
+                             Or(X[j] >= X[i] + plates[i][0], X[i] >= X[j] + plates[j][0]))
+# combine these two implications
 for (i,j) in combinations(range(n),2):
-    no_packing.append(And(Implies(plates[i][0] + plates[j][0] > w, Not(Y[i] == Y[j])), 
-        Implies(plates[i][1] + plates[j][1] > length, Not(X[i] == X[j]))))
+    no_packing.append(And(first_implication, second_implication))
 
 # add domain reducing constraints, comment if you don't want them
 opt.add(max_plate_x_dom + max_plate_y_dom + no_packing)
 
 
-# In[72]:
+# In[102]:
 
 
 # Symmetry breaking constraints
 
 # impose ordering between plates with equal size
 equal_size_sym = []
+
 for (i,j) in combinations(range(n),2):
-    equal_size_sym.append(Implies(plates[i] == plates[j], And(X[i] < X[j], Y[i] < Y[j])))
+    equal_size_sym.append(Implies(plates[i] == plates[j], 
+                                  Not(And(X[j] < X[i], Or(X[j] > X[i], Not(Y[j] < Y[i]))))))
 opt.add(equal_size_sym)
 
 # break vertical/horizontal symmetries
@@ -249,7 +258,7 @@ for (i,j) in combinations(range(n),2):
 opt.add(smaller_sym)
 
 
-# In[73]:
+# In[103]:
 
 
 # check model and find solution 
