@@ -33,15 +33,17 @@ constraint forall(i in 1..num_plates)(
 
 % no packing constraint
 constraint forall(i, j in 1..num_plates where i < j)(
-    ((plates_x[i] + plates_x[j] > width) -> y[i] != y[j]) /\ 
-    ((plates_y[i] + plates_y[j] > length) -> x[i] != x[j])
+    ((plates_x[i] + plates_x[j] > width) -> ((y[j] >= y[i] + plates_y[i]) \/ 
+      (y[i] >= y[j] + plates_y[j]))) /\ 
+    ((plates_y[i] + plates_y[j] > length) -> ((x[j] >= x[i] + plates_x[i]) \/
+      (x[i] >= x[j] + plates_x[j])))
   );
   
 % impose ordering between plates with equal size
 
 constraint forall(i, j in 1..num_plates where i < j)(
     (plates_x[i] == plates_x[j] /\ plates_y[i] == plates_y[j]) ->
-    (x[i] < x[j] /\ y[i] < y[j]));
+    not(x[j] < x[i] /\ ((x[j] > x[i]) \/ not(y[j] < y[i]))));
 
 % smaller circuits should be to the right or above bigger ones
 
