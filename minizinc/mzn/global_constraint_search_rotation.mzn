@@ -21,7 +21,15 @@ function int: get_min_sum_height(array[1..N] of int: height, array[1..N] of int:
   endif
   endif;
 
-int: min_sum_height = get_min_sum_height(height,width,0,0);
+function int: get_index(array[1..N,1..2] of int: size, int: max_width, int: pos, int: max_val) =
+        if pos > N then max_val
+        else if max_width == size[pos,1] then get_index(size,max_width,pos+1,pos)
+        else get_index(size,max_width,pos+1,max_val)
+        endif
+        endif;
+
+
+int: min_sum_height = get_min_sum_height(height,width,1,0);
 
 array[1..N] of var 0..W-1: x_coordinate; 
 array[1..N] of var 0..min_sum_height-1: y_coordinate;
@@ -77,10 +85,10 @@ constraint forall (i in 1..N, j in 1..N where i!=j)
 
 %endif);
 
-solve minimize Height;
+solve
+  :: int_search(rotation, dom_w_deg, indomain_random, complete)
 
-%  :: int_search(x_coordinate, dom_w_deg, indomain_random, complete)
-
+minimize Height;
 
 output [" Height= \(Height)",
       "\n x_coordinate= \(x_coordinate)",
