@@ -15,7 +15,6 @@ array[1..N] of int: height;
 % This is our reference frame for measuring the co-ordinates (abscissa and ordinate) of the circuit boards
 
 function int: get_min_sum_height(array[1..N] of int: height, array[1..N] of int: width, int: i, int: s) =
-  %sum ([ m | i in 1..N where if height[i] > width[i] then m=height[i] else m=width[i] endif]);
   if i > N then s
   else if height[i] < width[i] then get_min_sum_height(height,width,i+1,s+height[i])
   else get_min_sum_height(height,width,i+1,s+width[i])
