@@ -24,6 +24,10 @@ constraint forall(i in 1..N)(
   x_coordinate[i] + width[i] <= W  
 );
 
+constraint forall(i in 1..N)(
+  y_coordinate[i] + height[i] <= sum(height)  
+);
+
 constraint diffn(x_coordinate,y_coordinate,width,height);
 
 
