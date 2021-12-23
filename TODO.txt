@@ -1,6 +1,6 @@
 TODO
 
-in z3, apply reducing and symmetry breaking constraints.
+in z3, apply reducing and symmetry breaking constraints. (done, to be checked)
 
 Investigate a possible solution of the problem if it was possible to rotate the circuits, e.g. a nxm circuit could be placed as a mxn one
 

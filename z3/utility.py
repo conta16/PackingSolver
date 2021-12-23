@@ -108,6 +108,15 @@ class utility:
 		plt.figtext(0.5, 0.01, "minimum height: "+str(h), wrap=True, horizontalalignment='center', fontsize=12)
 		plt.show()
 
+	def get_max_index(self,arr):
+		max = -1
+		pos = -1
+		for i in range(len(arr)):
+			if arr[i] > max:
+				max = arr[i]
+				pos = i
+		return pos
+
 	def debug(self,w,num_of_circuits,size,lr,ud,px,py,ph):
 		print("Width:",w)
 		print("Num of circuits:",num_of_circuits)

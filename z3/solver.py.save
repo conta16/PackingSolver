@@ -103,18 +103,9 @@ class solver:
 		#speeding up constraints
 		for i in range(tmp_ncirc):
 			for j in range(i+1,tmp_ncirc):
-				if tmp_size[i][0]+tmp_size[j][0] > tmp_width:
-					self._s.add(And(Not(self._lr[i][j]),Not(self._lr[j][i])))
-
-		max_width_id = self._u.get_max_index(tmp_size[:][0])
-		#print((tmp_width-tmp_size[max_width_id,0])/2)
-		for e in range(int((tmp_width-tmp_size[max_width_id][0])/2),tmp_width-tmp_size[max_width_id][0]):
-			self._s.add(self._px[max_width_id][e])
-
-		for i in range(tmp_ncirc):
-			for j in range(i+1,tmp_ncirc):
-				if tmp_size[i][0] == tmp_size[j][0] and tmp_size[i][1] == tmp_size[j][1]:
-					self._s.add(And(Not(self._lr[j][i]),Or(self._lr[i][j],Not(self._ud[j][i]))))
+				if tmp_size[i][1] + tmp_size[j][1] > tmp_width:
+					self._s.add(And(Not(lr[i][j]),Not(lr[j][i])))
+		for e in range(tmp_width-tmp_size[])
 
 	def solve(self):
 		start_time = time.time()
