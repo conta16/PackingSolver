@@ -35,7 +35,9 @@ def get_solution():
 			solution[i] = eval('['+re.split('\]',re.split('\[',solution[i])[1])[0]+']')
 		#	solution[i] = regex_reduction(solution[i])
 	os.remove('tmp.txt')
-	return solution
+	if len(solution) == 4:
+		return solution, True
+	return solution, False
 
 def get_values(values_path):
 	"""
@@ -82,26 +84,34 @@ def get_max_height(size_h):
 			max_height = el
 	return max_height
 
-def plot(x_coordinates,y_coordinates,width,height,w,h):
+def plot(solution,width,height,w,ROTATION=False):
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	for i in range(len(width)):
 		hexadecimal = "#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])
-		rect = matplotlib.patches.Rectangle((x_coordinates[i],y_coordinates[i]), width[i], height[i], color=hexadecimal)
+		if ROTATION:
+			if solution[3][i]:
+				rect = matplotlib.patches.Rectangle((solution[1][i],solution[2][i]), height[i], width[i], color=hexadecimal)
+			else:
+				rect = matplotlib.patches.Rectangle((solution[1][i],solution[2][i]), width[i], height[i], color=hexadecimal)
+		else:
+			rect = matplotlib.patches.Rectangle((solution[1][i],solution[2][i]), width[i], height[i], color=hexadecimal)
 		ax.add_patch(rect)
 	plt.xlim([0, w])
-	plt.ylim([0, h])
-	plt.figtext(0.5, 0.01, "minimum height: "+str(h), wrap=True, horizontalalignment='center', fontsize=12)
+	plt.ylim([0, solution[0]])
+	plt.figtext(0.5, 0.01, "minimum height: "+str(solution[0]), wrap=True, horizontalalignment='center', fontsize=12)
 	plt.show()
 
-def debug(w,num_of_circuits,width,height,x_coordinates,y_coordinates,final_height):
+def debug(w,num_of_circuits,width,height,solution,ROTATION=False):
 	print("Width:",w)
 	print("Num of circuits:",num_of_circuits)
 	print("Width of circuits",width)
 	print("Height of circuits",height)
-	print("x_coordinates:",x_coordinates)
-	print("y_coordinates",y_coordinates)
-	print("final_height",final_height)
+	print("x_coordinates:",solution[1])
+	print("y_coordinates",solution[2])
+	print("final_height",solution[0])
+	if ROTATION:
+		print("Rotation",solution[3])
 
 if len(sys.argv) != 3:
 	print("error: wrong number of arguments (got",len(sys.argv),"expected 2)")
@@ -109,12 +119,8 @@ else:
 	mzn_path = sys.argv[1]
 	values_path = sys.argv[2]
 	launch_command(mzn_path,values_path)
-	final_height, x_coordinates, y_coordinates = get_solution()
+	solution, ROTATION = get_solution()
 	w, n, width, height = get_values(values_path)
-	#lr, ud, px, py = reshape(lr,ud,px,py)
-	#x_coordinates, y_coordinates = get_coordinates(px), get_coordinates(py)
-	#size = np.array(size)
-	#height = get_height(ph) + get_max_height(size[:,1])
-	debug(w,n,width,height,x_coordinates,y_coordinates,final_height)
-	plot(x_coordinates,y_coordinates,width,height,w,final_height)
+	debug(w,n,width,height,solution,ROTATION)
+	plot(solution,width,height,w,ROTATION)
 
