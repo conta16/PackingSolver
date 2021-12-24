@@ -3,15 +3,17 @@ TODO
 in z3, apply reducing and symmetry breaking constraints. (done, to be checked)
 
 Investigate a possible solution of the problem if it was possible to rotate the circuits, e.g. a nxm circuit could be placed as a mxn one
-
-Write a report:
+#for the rotation, when inside for loop, always use the safer value (the most conservative option, e.g. the
+#less constraining). When inside constraint, use Ands and take advantage of first px,py and ph values
+#which are always 0.
+Write a report: #not me please
 	- Describe how you tackle points 1-7 in pdf
 	- add code for CSP, add FOL or PL formulas for SAT and SMT
 	- Show experimental results
 
 Create README for all the basic instructions on how to run the code
 
-Prepare submission folder. It must contain:
+Prepare submission folder. It must contain: #not me please
 	- the pdf report
 	- a directory out with the output files corresponding to input files
 	- a directory src with all the source code with the README

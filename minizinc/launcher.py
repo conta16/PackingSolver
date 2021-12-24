@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 import random
 
 """
-usage: python3 launcher.py [.dzn file]
-The script launches the SATpacking.mzn program and shows the results in a graphical window
+usage: python3 launcher.py [.mzn file] [.dzn file]
+The script launches the packing .mzn program and shows the results in a graphical window
 """
 
-def launch_command(valeus_path):
-	os.system('minizinc SATpacking.mzn '+values_path+' > tmp.txt')
+def launch_command(mzn_path,values_path):
+	os.system('minizinc '+mzn_path+' '+values_path+' > tmp.txt')
 
 def regex_reduction(solution):
 	"""
@@ -28,12 +28,18 @@ def get_solution():
 	output: applies regex_reduction to each line of the output given by minizinc.
 		Returns a string containing the output of minizinc
 	"""
+	ROTATION = False
 	with open('tmp.txt','r') as f:
 		solution = f.readlines()[:-2]
+		if len(solution) == 6:
+			ROTATION = True
 		for i in range(len(solution)):
 			solution[i] = regex_reduction(solution[i])
 	os.remove('tmp.txt')
-	return solution
+	if ROTATION:
+		return solution, True
+	else:
+		return solution, False
 
 def get_values(values_path):
 	"""
@@ -88,38 +94,49 @@ def get_max_height(size_h):
 			max_height = el
 	return max_height
 
-def plot(x_coordinates,y_coordinates,size,w,h):
+def plot(x_coordinates,y_coordinates,size,w,h,rotation_sol=[]):
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	for i in range(len(size)):
 		hexadecimal = "#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])
-		rect = matplotlib.patches.Rectangle((x_coordinates[i],y_coordinates[i]), size[i][0], size[i][1], color=hexadecimal)
+		if len(rotation_sol) > 0 and rotation_sol[i]:
+			rect = matplotlib.patches.Rectangle((x_coordinates[i],y_coordinates[i]), size[i][1], size[i][0], color=hexadecimal)
+		else:
+			rect = matplotlib.patches.Rectangle((x_coordinates[i],y_coordinates[i]), size[i][0], size[i][1], color=hexadecimal)
 		ax.add_patch(rect)
 	plt.xlim([0, w])
 	plt.ylim([0, h])
 	plt.figtext(0.5, 0.01, "minimum height: "+str(h), wrap=True, horizontalalignment='center', fontsize=12)
 	plt.show()
 
-def debug(w,num_of_circuits,size,lr,ud,px,py,ph):
+def debug(w,num_of_circuits,size,solution,rotation):
         print("Width:",w)
         print("Num of circuits:",num_of_circuits)
         print("Size of circuits:",size)
-        print("lr:",lr)
-        print("ud:",ud)
-        print("px:",px)
-        print("py:",py)
-        print("ph:",ph)
+        print("lr:",solution[0])
+        print("ud:",solution[1])
+        print("px:",solution[2])
+        print("py:",solution[3])
+        print("ph:",solution[4])
+        if rotation:
+                print("rotation:",solution[5])
+        else:
+                print("rotation: False")
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
 	print("error: wrong number of arguments (got",len(sys.argv),"expected 2)")
 else:
-	values_path = sys.argv[1]
-	launch_command(values_path)
-	lr, ud, px, py, ph = get_solution()
+	mzn_path = sys.argv[1]
+	values_path = sys.argv[2]
+	launch_command(mzn_path,values_path)
+	solution, rotation = get_solution()
 	w, n, size = get_values(values_path)
-	lr, ud, px, py = reshape(lr,ud,px,py)
-	x_coordinates, y_coordinates = get_coordinates(px), get_coordinates(py)
+	solution[0], solution[1], solution[2], solution[3] = reshape(solution[0],solution[1],solution[2],solution[3])
+	x_coordinates, y_coordinates = get_coordinates(solution[2]), get_coordinates(solution[3])
 	size = np.array(size)
-	height = get_height(ph) + get_max_height(size[:,1])
-	debug(w,n,size,lr,ud,px,py,ph)
-	plot(x_coordinates,y_coordinates,size,w,height)
+	height = get_height(solution[4]) + get_max_height(size[:,1])
+	debug(w,n,size,solution,rotation)
+	if rotation:
+		plot(x_coordinates,y_coordinates,size,w,height,solution[5])
+	else:
+		plot(x_coordinates,y_coordinates,size,w,height)
