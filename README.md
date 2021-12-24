@@ -11,7 +11,7 @@ In this repository you can find some solutions to the **packing problem**. We de
 
 The code has not been tested on other versions, so it may need some changes depending on the software you are using
 
-## How to use Minizinc SAT model
+## How to use Minizinc CSP model
 
 Run, from your terminal, the command
 
