@@ -59,33 +59,9 @@ constraint forall (i in 1..N, j in 1..N where i!=j)
 (((y_coordinate[j] + height[j])*(1-rotation[j]) <= y_coordinate[i]) /\ ((y_coordinate[j] + width[j])*rotation[j] <= y_coordinate[i]))
 );
 
-% Symmetry Breaking constraints.
-% Type : 1 : When there be multiple circuit boards of same dimensions which when being swapped shall result in symmetric solutions
 
-constraint forall (i in 1..N, j in i+1..N)
-(
-if (width[i] == width[j] /\ height[i] == height[j]) then
 
-lex_greater([x_coordinate[i], y_coordinate[i]],[x_coordinate[j], y_coordinate[j]])
-
-endif);
-
-% Symmetry Breaking constraints.
-% Type : 3 : Swapping of rows. 
-% The symmety breaking in this case is being indirectly tackled by not allowing any smaller circuit board is below any bigger one.
-
-%constraint forall (i in 1..N, j in 1..N where i!=j)
-%(
-%if (width[i] < width[j]) then
-
-%lex_greater([x_coordinate[i],y_coordinate[i]],[x_coordinate[j],y_coordinate[j]])
-
-%endif);
-
-solve
-  :: int_search(rotation, dom_w_deg, indomain_random, complete)
-
-minimize Height;
+solve minimize Height;
 
 output [" Height= \(Height)",
       "\n x_coordinate= \(x_coordinate)",

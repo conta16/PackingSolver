@@ -20,23 +20,35 @@ array[1..N] of var 0..sum(height)-1: y_coordinate;
 % Defining the objective function which we are trying to minimize
 var 1..sum(height): Height = max([y_coordinate[i] + height[i]| i in 1..N]);
 
+
+% This section of the code ensures that under no circumstances, the set of slabs can ever be beyond the maximum permissible width
+
 constraint forall(i in 1..N)(
   x_coordinate[i] + width[i] <= W  
 );
 
-constraint diffn(x_coordinate,y_coordinate,width,height);
+% This section of the ensures that under no circumstances, the set of slabs can ever go beyond the maximum height (Height) something which we are 
+% trying to minimize
 
+constraint forall(i in 1..N)(
+  y_coordinate[i] + height[i] <= Height  
+);
+
+
+constraint cumulative(x_coordinate,width,height,Height);
+constraint cumulative(y_coordinate,height,width,W);
+constraint diffn(x_coordinate,y_coordinate,width,height);
 
 % Symmetry Breaking constraints.
 % Type : 1 : When there be multiple circuit boards of same dimensions which when being swapped shall result in symmetric solutions
 
-%constraint forall (i in 1..N, j in 1..N where i!=j)
-%(
-%if (width[i] == width[j] /\ height[i] == height[j]) then
+constraint forall (i in 1..N, j in 1..N where i!=j)
+(
+if (width[i] == width[j] /\ height[i] == height[j]) then
 
-%lex_greater([x_coordinate[i], y_coordinate[i]],[x_coordinate[j], y_coordinate[j]])
+lex_greater([x_coordinate[i], y_coordinate[i]],[x_coordinate[j], y_coordinate[j]])
 
-%endif);
+endif);
 
 % Symmetry Breaking constraints.
 % Type : 3 : Swapping of rows. 

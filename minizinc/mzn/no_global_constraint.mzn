@@ -1,6 +1,7 @@
 % Use this editor as a MiniZinc scratch book
 include "gecode.mzn";
 include "globals.mzn";
+include "diffn.mzn";
 
 int: W; % width (Width of the Bigger rectangular plate on which the smaller rectangular circuit boards must be fitted)
 int: N; % no. of circuit boards to be placed
@@ -35,8 +36,7 @@ constraint forall(i in 1..N)(
 );
 
 % non-overlapping constraints
-
-constraint forall (i in 1..N, j in 1..N where i!=j) 
+constraint forall (i,j in 1..N where i<j) 
 (
 
 (x_coordinate[i] + width[i] <= x_coordinate[j])

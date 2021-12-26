@@ -25,11 +25,12 @@ constraint forall(i in 1..N)(
 );
 
 constraint forall(i in 1..N)(
-  y_coordinate[i] + height[i] <= sum(height)  
+  y_coordinate[i] + height[i] <= Height 
 );
 
+constraint cumulative(x_coordinate,width,height,Height);
+constraint cumulative(y_coordinate,height,width,W);
 constraint diffn(x_coordinate,y_coordinate,width,height);
-
 
 % Symmetry Breaking constraints.
 % Type : 1 : When there be multiple circuit boards of same dimensions which when being swapped shall result in symmetric solutions

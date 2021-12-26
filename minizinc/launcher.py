@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import random
+import time
 
 """
 usage: python3 launcher.py [.dzn file]
@@ -12,7 +13,9 @@ The script launches the SATpacking.mzn program and shows the results in a graphi
 """
 
 def launch_command(mzn_path,valeus_path):
+	start_time = time.time()
 	os.system('minizinc '+mzn_path+' '+values_path+' > tmp.txt')
+	print("minizinc exec time:"+str(time.time()-start_time))
 
 def regex_reduction(solution):
 	"""
