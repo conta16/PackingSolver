@@ -42,25 +42,18 @@ def get_solution():
 		return solution, False
 
 def get_values(values_path):
-	"""
-	input: path to .dzn file
-	output: width of plate, number of circuits, size of each circuit. These values are taken from the .dzn file
-	"""
-	with open(values_path,'r') as f:
-		values = f.readlines()
-		w = eval(re.split(';',re.split('=',values[0])[1][1:])[0])
-		num_of_circuits = eval(re.split(';',re.split('=',values[1])[1][1:])[0])
-		size = values[2:]
-		size[0] = re.split('=',size[0])[1]
-		for i in range(len(size)):
-			size[i] = re.sub('\t','',size[i])
-			size[i] = re.sub('\n','',size[i])
-		size[-1] = re.sub('\|','[',size[-1],1)
-		size[-1] = re.split(';',re.sub('\|',']',size[-1]))[0]
-		for i in range(len(size)-1):
-			size[i] = re.sub('\|','[',size[i])+'],'
-		size = eval(''.join(size))
-	return w, num_of_circuits, size
+        """
+        input: path to .dzn file
+        output: width of plate, number of circuits, size of each circuit. These values are taken from the .dzn file
+        """
+        with open(values_path,'r') as f:
+                values = f.readlines()
+                w = eval(re.split(';',re.split('=',values[0])[1][1:])[0])
+                num_of_circuits = eval(re.split(';',re.split('=',values[1])[1][1:])[0])
+                width = eval(re.split(';',re.split('=',values[2])[1][1:])[0])
+                height = eval(re.split(';',re.split('=',values[3])[1][1:])[0])
+        return w, num_of_circuits, width, height
+
 
 def reshape(lr,ud,px,py):
 	"""
