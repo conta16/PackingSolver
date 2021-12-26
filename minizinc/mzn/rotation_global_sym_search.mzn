@@ -21,13 +21,6 @@ function int: get_min_sum_height(array[1..N] of int: height, array[1..N] of int:
   endif
   endif;
 
-function int: get_index(array[1..N,1..2] of int: size, int: max_width, int: pos, int: max_val) =
-        if pos > N then max_val
-        else if max_width == size[pos,1] then get_index(size,max_width,pos+1,pos)
-        else get_index(size,max_width,pos+1,max_val)
-        endif
-        endif;
-
 
 int: min_sum_height = get_min_sum_height(height,width,1,0);
 
@@ -63,8 +56,8 @@ array[1..N] of var 0..W-1: width_rotated = [if rotation[i] == 1 then height[i] e
 array[1..N] of var 0..min_sum_height-1: height_rotated = [if rotation[i] == 1 then width[i] else height[i] endif | i in 1..N];
 
 
-constraint cumulative(x_coordinate,width_rotated,height_rotated,Height);
-constraint cumulative(y_coordinate,height_rotated,width_rotated,W);
+constraint cumulative(x_coordinate,width_rotated,height_rotated,Height); %implied constraints
+constraint cumulative(y_coordinate,height_rotated,width_rotated,W); %implied constraints
 
 
 constraint forall (i in 1..N, j in i+1..N)

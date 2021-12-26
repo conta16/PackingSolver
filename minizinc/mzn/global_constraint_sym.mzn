@@ -35,8 +35,8 @@ constraint forall(i in 1..N)(
 );
 
 
-constraint cumulative(x_coordinate,width,height,Height);
-constraint cumulative(y_coordinate,height,width,W);
+constraint cumulative(x_coordinate,width,height,Height); %implied constraints
+constraint cumulative(y_coordinate,height,width,W); %implied constraints
 constraint diffn(x_coordinate,y_coordinate,width,height);
 
 % Symmetry Breaking constraints.

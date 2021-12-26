@@ -21,13 +21,6 @@ function int: get_min_sum_height(array[1..N] of int: height, array[1..N] of int:
   endif
   endif;
 
-function int: get_index(array[1..N,1..2] of int: size, int: max_width, int: pos, int: max_val) =
-        if pos > N then max_val
-        else if max_width == size[pos,1] then get_index(size,max_width,pos+1,pos)
-        else get_index(size,max_width,pos+1,max_val)
-        endif
-        endif;
-
 
 int: min_sum_height = get_min_sum_height(height,width,1,0);
 
