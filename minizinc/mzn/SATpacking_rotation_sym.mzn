@@ -8,10 +8,10 @@ array[NCIRCUITS] of int: width;
 array[NCIRCUITS] of int: height;
 
 
-function int: get_index(array[NCIRCUITS] of int: width, array[NCIRCUITS] of int: height, int: max_width, int: pos, int: max_val) =
-	if pos > N then max_val
-	else if max_width == width[pos] then get_index(width,height,max_width,pos+1,pos)
-	else get_index(width,height,max_width,pos+1,max_val)
+function var int: get_index(array[NCIRCUITS] of var int: arr, var int: max_arr, int: pos, int: max_pos) =
+	if pos > N then max_pos
+	else if max_arr == arr[pos] then get_index(arr,max_arr,pos+1,pos)
+	else get_index(arr,max_arr,pos+1,max_pos)
 	endif
 	endif;
 		
@@ -31,7 +31,7 @@ function int: get_sum_height(array[NCIRCUITS] of int: width, array[NCIRCUITS] of
         endif
         endif;
         
-function int: get_max_dim(array[NCIRCUITS] of int: width, array[NCIRCUITS] of int: height, int: i, int: m) =
+function int: get_max_dim(array[NCIRCUITS] of int: width, array[NCIRCUITS] of int: height, int: i, int: m) = %max between all dimensions
         if i > N then m
         else if width[i] > height[i] /\ width[i] > m then get_max_dim(width,height,i+1,width[i])
         else if height[i] >= width[i] /\ height[i] > m then get_max_dim(width,height,i+1,height[i])
@@ -39,10 +39,16 @@ function int: get_max_dim(array[NCIRCUITS] of int: width, array[NCIRCUITS] of in
         endif
         endif
         endif;
+        
+function var int: get_max_width(array[NCIRCUITS] of var int: width, int: i, var int: m) =
+        if i > N then m
+        else if width[i] > m then get_max_width(width,i+1,width[i])
+        else get_max_width(width,i+1,m)
+        endif
+        endif;
 
 int: sum_height = get_sum_height(width,height,1,0);
 int: max_height = get_max_dim(width,height,1,0);
-int: max_width = max_height;
 array[NCIRCUITS] of int: max_size = [if width[i] > height[i] then width[i] else height[i] endif | i in NCIRCUITS];
 array[NCIRCUITS] of int: min_size = [if width[i] > height[i] then height[i] else width[i] endif | i in NCIRCUITS];
 
@@ -54,8 +60,6 @@ array[NCIRCUITS,0..plate_width] of var bool: px; % true if the i-th block is at 
 array[NCIRCUITS,0..sum_height] of var bool: py; % true if the i-th block is below f, where f is an int that spans the sum of all the heights 
 array[max_height..sum_height] of var bool: ph; % true if the int o is above all the blocks
 array[NCIRCUITS] of var bool: rotation; %1 -> width and height are swapped, 0 otherwise
-
-int: max_width_index = get_index(width,height,max_width,1,1);
 
 %order encoding
 
@@ -128,18 +132,24 @@ constraint forall (o in max_height+1..sum_height-1, i in NCIRCUITS)(
 %speeding up constraints
 %if the sum of the widths of 2 circuits is higher than the width of the plate, then the circuits can't be to the left of the other or viceversa
 
-%constraint forall(i in NCIRCUITS, j in i+1..N)(
-% if width[i] + width[j] > w then not(lr[i,j]) /\ not(lr[j,i]) endif
-%);
+array[1..N] of var int: width_rotated = [if rotation[i] then height[i] else width[i] endif | i in 1..N];
+array[1..N] of var int: height_rotated = [if rotation[i] then width[i] else height[i] endif | i in 1..N];
 
-%constraint forall(e in ((plate_width-width[max_width_index]) div 2)..plate_width-width[max_width_index])(
-%	px[max_width_index,e] %solve reduction for circuit with max width, simmetry breaking
-%);
+constraint forall(i in NCIRCUITS, j in i+1..N)(
+ if width_rotated[i] + width_rotated[j] > W then not(lr[i,j]) /\ not(lr[j,i]) endif
+);
+
+var int: max_width = get_max_width(width_rotated,1,0);
+var int: max_width_index = get_index(width_rotated,max_width,1,1);
+
+constraint forall(e in ((plate_width-width[max_width_index]) div 2)..plate_width-width[max_width_index])(
+	px[max_width_index,e] %solve reduction for circuit with max width, simmetry breaking
+);
 
 %if we have 2 circuits with same width and height, we impose an ordering (symmetry breaking)
-%constraint forall(i in NCIRCUITS, j in i+1..N)(
-% if width[i] == width[j] /\ height[i] == height[j] then not(lr[j,i]) /\ (lr[i,j] \/ not(ud[j,i])) endif
-%);
+constraint forall(i in NCIRCUITS, j in i+1..N)(
+ if width_rotated[i] == width_rotated[j] /\ height_rotated[i] == height_rotated[j] then not(lr[j,i]) /\ (lr[i,j] \/ not(ud[j,i])) endif
+);
 
 var int: final_height = height(ph,max_height); %find position in which ph[o] switches from false to true (height that contains each block)
 

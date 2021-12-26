@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import random
+import time
 
 """
 usage: python3 launcher.py [.mzn file] [.dzn file]
@@ -12,7 +13,9 @@ The script launches the packing .mzn program and shows the results in a graphica
 """
 
 def launch_command(mzn_path,values_path):
+	start_time = time.time()
 	os.system('minizinc '+mzn_path+' '+values_path+' > tmp.txt')
+	print("minizinc exec time: "+str(time.time()-start_time))
 
 def regex_reduction(solution):
 	"""
@@ -87,30 +90,32 @@ def get_max_height(size_h):
 			max_height = el
 	return max_height
 
-def plot(x_coordinates,y_coordinates,size,w,h,rotation_sol=[]):
+def plot(x_coordinates,y_coordinates,width,height,w,h,rotation_sol=[]):
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
-	for i in range(len(size)):
+	for i in range(len(width)):
 		hexadecimal = "#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])
 		if len(rotation_sol) > 0 and rotation_sol[i]:
-			rect = matplotlib.patches.Rectangle((x_coordinates[i],y_coordinates[i]), size[i][1], size[i][0], color=hexadecimal)
+			rect = matplotlib.patches.Rectangle((x_coordinates[i],y_coordinates[i]), height[i], width[i], color=hexadecimal)
 		else:
-			rect = matplotlib.patches.Rectangle((x_coordinates[i],y_coordinates[i]), size[i][0], size[i][1], color=hexadecimal)
+			rect = matplotlib.patches.Rectangle((x_coordinates[i],y_coordinates[i]), width[i], height[i], color=hexadecimal)
 		ax.add_patch(rect)
 	plt.xlim([0, w])
 	plt.ylim([0, h])
 	plt.figtext(0.5, 0.01, "minimum height: "+str(h), wrap=True, horizontalalignment='center', fontsize=12)
 	plt.show()
 
-def debug(w,num_of_circuits,size,solution,rotation):
+def debug(w,num_of_circuits,width,height,solution,final_height,rotation):
         print("Width:",w)
         print("Num of circuits:",num_of_circuits)
-        print("Size of circuits:",size)
+        print("Width of circuits:",width)
+        print("Height of circuits:",height)
         print("lr:",solution[0])
         print("ud:",solution[1])
         print("px:",solution[2])
         print("py:",solution[3])
         print("ph:",solution[4])
+        print("Final height:",final_height)
         if rotation:
                 print("rotation:",solution[5])
         else:
@@ -123,13 +128,13 @@ else:
 	values_path = sys.argv[2]
 	launch_command(mzn_path,values_path)
 	solution, rotation = get_solution()
-	w, n, size = get_values(values_path)
+	w, n, width, height = get_values(values_path)
 	solution[0], solution[1], solution[2], solution[3] = reshape(solution[0],solution[1],solution[2],solution[3])
 	x_coordinates, y_coordinates = get_coordinates(solution[2]), get_coordinates(solution[3])
-	size = np.array(size)
-	height = get_height(solution[4]) + get_max_height(size[:,1])
-	debug(w,n,size,solution,rotation)
+	width, height = np.array(width), np.array(height)
+	final_height = get_height(solution[4]) + get_max_height(height)
+	debug(w,n,width,height,solution,final_height,rotation)
 	if rotation:
-		plot(x_coordinates,y_coordinates,size,w,height,solution[5])
+		plot(x_coordinates,y_coordinates,width,height,w,final_height,solution[5])
 	else:
-		plot(x_coordinates,y_coordinates,size,w,height)
+		plot(x_coordinates,y_coordinates,width,height,w,final_height)
