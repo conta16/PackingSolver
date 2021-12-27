@@ -112,6 +112,12 @@ constraint forall(i in NCIRCUITS, j in i+1..N)(
  if width[i] + width[j] > W then not(lr[i,j]) /\ not(lr[j,i]) endif
 );
 
+constraint forall(i in 1..N)(
+ if i!=max_width_index /\ (width[i] > ((plate_width-width[max_width_index]) div 2)) then
+	  not(lr[i,max_width_index]) %solve reduction for circuit with max width, simmetry breaking
+	endif
+);
+
 constraint forall(e in ((plate_width-width[max_width_index]) div 2)..plate_width-width[max_width_index])(
 	px[max_width_index,e] %solve reduction for circuit with max width, simmetry breaking
 );

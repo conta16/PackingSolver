@@ -69,11 +69,11 @@ constraint forall(i in NCIRCUITS)( %same here
 
 %order constraints
 
-constraint forall(i in NCIRCUITS, e in 0..plate_width-min_size[i]-1)(
+constraint forall(i in NCIRCUITS, e in 0..plate_width-min_size[i]-1)( %change min_size with mult with 1-rotation...
 	not(px[i,e]) \/ px[i,e+1]
 );
 
-constraint forall(i in NCIRCUITS, f in 0..sum_height-min_size[i]-1)(
+constraint forall(i in NCIRCUITS, f in 0..sum_height-min_size[i]-1)( %change min_size with mult with 1-rotation...
  not(py[i,f]) \/ py[i,f+1]
 );
 
