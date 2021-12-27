@@ -13,7 +13,7 @@ array[1..num_plates] of var int: x;
 array[1..num_plates] of var int: y;
 
 var 1..sum(plates_y): length = max([y[i] + plates_y[i] | i in 1..num_plates]); 
-
+var 1..sum(plates_x): max_width = max([x[i] + plates_x[i] | i in 1..num_plates]);
 % domains of values in x
 constraint forall(i in 1..num_plates)(x[i] >= 0 /\ x[i] <= width - plates_x[i]);
 % domains of values in y
@@ -27,9 +27,7 @@ constraint forall(i, j in 1..num_plates where i < j) (
   y[j] + plates_y[j] <= y[i]);
 
 % upper bound on the width
-constraint forall(i in 1..num_plates)(
-  x[i] + plates_x[i] <= width 
-);
+constraint max_width <= width;
 
 % no packing constraint
 constraint forall(i, j in 1..num_plates where i < j)(
