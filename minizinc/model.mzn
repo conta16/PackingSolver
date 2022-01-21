@@ -1,4 +1,5 @@
 % Use this editor as a MiniZinc scratch book
+% Use this editor as a MiniZinc scratch book
 int: width;
 int: num_plates;
 % width of each plate
@@ -41,7 +42,7 @@ constraint forall(i, j in 1..num_plates where i < j)(
 
 constraint forall(i, j in 1..num_plates where i < j)(
     (plates_x[i] == plates_x[j] /\ plates_y[i] == plates_y[j]) ->
-    not(x[j] < x[i] /\ ((x[j] > x[i]) \/ not(y[j] < y[i]))));
+    (not(x[j] < x[i]) /\ (x[j] > x[i] \/ not(y[j] < y[i]))));
 
 % smaller circuits should be to the right or above bigger ones
 
@@ -69,4 +70,3 @@ output [show(width) ++ " " ++ show(length) ++ "\n" ++
         show(num_plates) ++ "\n"] ++ 
         [show(plates_x[i]) ++ " " ++ show(plates_y[i]) ++ " " ++
           show(x[i]) ++ " " ++ show(y[i]) ++ "\n" | i in 1..num_plates];
-

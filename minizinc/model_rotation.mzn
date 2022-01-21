@@ -52,7 +52,7 @@ constraint forall(i, j in 1..num_plates where i < j)(
 
 constraint symmetry_breaking_constraint(forall(i, j in 1..num_plates where i < j)(
     (plates_x_r[i] == plates_x_r[j] /\ plates_y_r[i] == plates_y_r[j]) ->
-    not(x[j] < x[i] /\ ((x[j] > x[i]) \/ not(y[j] < y[i])))));
+    not(x[j] < x[i]) /\ ((x[j] > x[i]) \/ not(y[j] < y[i]))));
 
 % smaller circuits should be to the right or above bigger ones
 
