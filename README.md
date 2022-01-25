@@ -20,5 +20,14 @@ Run, from your terminal, the command
 ```python3 ./minizinc/launcher.py [/path/to/file.mzn] [/path/to/file.dzn]```
 
 The script will automatically launch the *Minizinc* solver and show its output in *Matplotlib*.<br>
-For *Minizinc* it is also available a program (SATpacking_rotation) which gives the solution considering a possible rotation (swap between width and height dimensions) of the circuits.
-For *Python Z3* this feature is still to be implemented.
+For *Minizinc* it is also available a program which gives the solution considering a possible rotation (swap between width and height dimensions) of the circuits.<br>
+Among the ``.mzn`` files in ``/src``, the best performing ones are ``SATpacking_sym_search.mzn`` and ``SATpacking_rotation_sym_search.mzn``.
+
+## How to use Python Z3 SAT model
+
+Run, from your terminal, the command
+
+```python3 ./z3/SATpacking.py [/path/to/file.xml]```
+
+The script will automatically launch the *Python Z3* solver and show its output in *Matplotlib*.<br>
+In *Python Z3*, rotation is not implemented, but computation is improved by applying the same constraints specified in *Minizinc*.
