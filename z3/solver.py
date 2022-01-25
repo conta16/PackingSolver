@@ -120,7 +120,7 @@ class solver:
 		start_time = time.time()
 		set_option(max_lines=500,max_args=500)
 		mx = self._s.minimize(self._u.get_sym_height(self._ph))
-		print("--- %s seconds ---" % (time.time() - start_time))
+		print("--- solving time: %s seconds ---" % (time.time() - start_time))
 		if self._s.check() == sat:
 			m = self._s.model()
 
@@ -132,6 +132,9 @@ class solver:
 			y_coordinates = self._u.get_coordinates(py)
 
 			self._u.debug(self._d.get_width(),self._d.get_num_of_circuits(),self._d.get_size(),lr,ud,px,py,ph)
+			print("x_coordinates: ",x_coordinates)
+			print("y_coordinates: ",y_coordinates)
+			print("final height: ",final_height)
 			self._u.plot(x_coordinates,y_coordinates,self._d.get_size(),self._d.get_width()-1,final_height)
 		else:
 			print("unsat")

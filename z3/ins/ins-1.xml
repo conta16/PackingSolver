@@ -1,0 +1,23 @@
+<app>
+	<width>8</width>
+	<numcircuits>4</numcircuits>
+	<size>
+		<row1>
+			<cell>3</cell>
+			<cell>3</cell>
+		</row1>
+		<row2>
+			<cell>3</cell>
+			<cell>5</cell>
+		</row2>
+		<row3>
+			<cell>5</cell>
+			<cell>3</cell>
+		</row3>
+		<row4>
+			<cell>5</cell>
+			<cell>5</cell>
+		</row4>
+	</size>
+</app>
+
