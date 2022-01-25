@@ -1,0 +1,1 @@
+minizinc exec time: 300.13141202926636

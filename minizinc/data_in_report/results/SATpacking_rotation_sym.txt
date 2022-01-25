@@ -1,0 +1,19 @@
+Based on mid-computation solutions, it is generally slightly faster than without symmetry breaking 
+
+---- DATA1 ----
+
+minizinc exec time: > 10 min
+
+---- DATA2 ----
+
+minizinc exec time: > 10 min
+
+---- DATA3 ----
+
+---- DATA4 ----
+
+minizinc exec time: > 30 min
+
+---- DATA5 ----
+
+minizinc exec time: > 10 min
