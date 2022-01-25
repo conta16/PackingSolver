@@ -64,7 +64,7 @@ def extract_data(instance):
             plates.append(list_ints)
     return width, n_circuits, plates
 
-w, n, plates = extract_data(get_instance(path, files_dict["ins-6"]))
+w, n, plates = extract_data(get_instance(path, files_dict["ins-5"]))
 print("width: " + str(w))
 print("number of circuits: " + str(n))
 print("plates:", plates)

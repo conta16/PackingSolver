@@ -1,0 +1,13 @@
+{'ins-24': 'ins-24.txt', 'ins-40': 'ins-40.txt', 'ins-1': 'ins-1.txt', 'ins-10': 'ins-10.txt', 'ins-11': 'ins-11.txt', 'ins-12': 'ins-12.txt', 'ins-13': 'ins-13.txt', 'ins-14': 'ins-14.txt', 'ins-15': 'ins-15.txt', 'ins-16': 'ins-16.txt', 'ins-17': 'ins-17.txt', 'ins-18': 'ins-18.txt', 'ins-19': 'ins-19.txt', 'ins-2': 'ins-2.txt', 'ins-20': 'ins-20.txt', 'ins-21': 'ins-21.txt', 'ins-22': 'ins-22.txt', 'ins-23': 'ins-23.txt', 'ins-25': 'ins-25.txt', 'ins-26': 'ins-26.txt', 'ins-27': 'ins-27.txt', 'ins-28': 'ins-28.txt', 'ins-29': 'ins-29.txt', 'ins-3': 'ins-3.txt', 'ins-30': 'ins-30.txt', 'ins-31': 'ins-31.txt', 'ins-32': 'ins-32.txt', 'ins-33': 'ins-33.txt', 'ins-34': 'ins-34.txt', 'ins-35': 'ins-35.txt', 'ins-36': 'ins-36.txt', 'ins-37': 'ins-37.txt', 'ins-38': 'ins-38.txt', 'ins-39': 'ins-39.txt', 'ins-4': 'ins-4.txt', 'ins-5': 'ins-5.txt', 'ins-6': 'ins-6.txt', 'ins-7': 'ins-7.txt', 'ins-8': 'ins-8.txt', 'ins-9': 'ins-9.txt'}
+width: 9
+number of circuits: 5
+plates: [[3, 3], [3, 4], [3, 5], [3, 6], [3, 9]]
+areas: [9, 12, 15, 18, 27]
+Solution found in 18.9 ms
+9 9
+5
+3 3 3 6
+3 4 0 5
+3 5 0 0
+3 6 3 0
+3 9 6 0

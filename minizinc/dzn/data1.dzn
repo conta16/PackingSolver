@@ -1,5 +1,0 @@
-width = 9;
-num_plates = 5;
-plates_x = [3,2,2,3,4];
-plates_y = [3,4,8,9,12];
-

@@ -64,7 +64,7 @@ def extract_data(instance):
             plates.append(list_ints)
     return width, n_circuits, plates
 
-w, n, plates = extract_data(get_instance(path, files_dict["ins-1"]))
+w, n, plates = extract_data(get_instance(path, files_dict["ins-11"]))
 print("width: " + str(w))
 print("number of circuits: " + str(n))
 print("plates:", plates)
@@ -200,7 +200,7 @@ for (i,j) in combinations(range(n),2):
     no_packing.append(And(first_implication, second_implication))
 
 # add domain reducing constraints, comment if you don't want them
-opt.add(max_plate_x_dom + max_plate_y_dom + no_packing)
+#opt.add(max_plate_x_dom + max_plate_y_dom + no_packing)
 
 # Symmetry breaking constraints
 
@@ -210,7 +210,7 @@ equal_size_sym = []
 for (i,j) in combinations(range(n),2):
     equal_size_sym.append(Implies(plates[i] == plates[j], 
                                   And(Not(X[j] < X[i]), Or(X[j] > X[i], Not(Y[j] < Y[i])))))
-opt.add(equal_size_sym)
+#opt.add(equal_size_sym)
 
 # break vertical/horizontal symmetries
 
@@ -218,7 +218,7 @@ opt.add(equal_size_sym)
 smaller_sym = []
 for (i,j) in combinations(range(n),2):
     smaller_sym.append(Implies(areas[i] < areas[j], Or(X[i] > X[j], Y[i] > Y[j])))
-opt.add(smaller_sym)
+#opt.add(smaller_sym)
 
 start_time = time.time()
 

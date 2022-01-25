@@ -1,0 +1,9 @@
+minizinc exec time:0.1347975730895996
+Width: 11
+Num of circuits: 7
+Width of circuits [3, 3, 3, 3, 5, 5, 8]
+Height of circuits [3, 4, 5, 6, 3, 4, 4]
+x_coordinates: [5, 9]
+y_coordinates [8, 6]
+final_height 12
+[[5, 9], [8, 6], [5, 4], [8, 0], [0, 8], [0, 4], [0, 0]]

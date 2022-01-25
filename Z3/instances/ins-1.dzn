@@ -1,0 +1,4 @@
+width = 8;
+num_plates = 4;
+plates_x = [3, 3, 5, 5];
+plates_y = [3, 5, 3, 5];
