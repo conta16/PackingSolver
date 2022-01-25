@@ -1,0 +1,41 @@
+---- DATA1 ----
+
+minizinc exec time:0.24585819244384766
+Width: 9
+Num of circuits: 5
+Width of circuits [3, 2, 2, 3, 4]
+Height of circuits [3, 4, 8, 9, 12]
+x_coordinates: [6, 4, 4, 6, 0]
+y_coordinates [9, 8, 0, 0, 0]
+final_height 12
+
+---- DATA2 ----
+
+minizinc exec time:0.26302361488342285
+Width: 10
+Num of circuits: 6
+Width of circuits [3, 3, 3, 3, 4, 4]
+Height of circuits [3, 4, 6, 7, 4, 6]
+x_coordinates: [7, 4, 4, 7, 0, 0]
+y_coordinates [7, 6, 0, 0, 0, 4]
+final_height 10
+
+---- DATA3 ----
+
+minizinc exec time:26344.97564482689
+
+---- DATA4 ----
+
+minizinc exec time:1290.0079321861267
+
+---- DATA5 ----
+
+minizinc exec time:1.6209688186645508
+Width: 15
+Num of circuits: 7
+Width of circuits [3, 2, 2, 3, 4, 6, 2]
+Height of circuits [3, 4, 8, 9, 12, 9, 12]
+x_coordinates: [8, 0, 2, 8, 11, 0, 6]
+y_coordinates [9, 9, 9, 0, 0, 0, 0]
+final_height 17
+
