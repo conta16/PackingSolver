@@ -19,7 +19,8 @@ Run, from your terminal, the command
 
 The script will automatically launch the *Minizinc* solver and show its output in *Matplotlib*.<br>
 The ```no_global_constraint.mzn``` file contains no optimization and it is the slowest.<br>
-The ```global_constraint.mzn``` file contains symmetry breaking and global constraints, while ```global_constraint_search.mzn``` gives a faster solution by applying an annotated search.<br>
+The ```global_constraint.mzn``` file contains global constraints and implied constraints, while ```global_constraint_sym.mzn``` gives a faster solution by also applying symmetry breaking.
+```global_constraint_sym_search.mzn``` also applies annotated search. <br>
 The ```global_constraint_search_rotation.mzn``` file implements a solution which takes care of possible rotations (swapping between width and height) of each circuit.
 
 
